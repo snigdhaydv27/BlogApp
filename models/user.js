@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { createHmac, randomBytes } = require("crypto");
+const { createTokenForUser } = require("../services/authentication");
 
 const userSchema = new mongoose.Schema(
     {
@@ -53,7 +54,7 @@ userSchema.pre("save", function (next) {
 });
 
 // Static method for password matching
-userSchema.static("matchPassword", async function (email, password) {
+userSchema.static("matchPasswordAndGenerateToken", async function (email, password) {
     if (!email || !password) {
         throw new Error("Email and password must be provided!");
     }
@@ -72,8 +73,8 @@ userSchema.static("matchPassword", async function (email, password) {
     if (hashedPassword !== userProvideHash) {
         throw new Error("Incorrect password provided!");
     }
-
-    return user;
+   const token = createTokenForUser(user);
+    return token;
 });
 
 const User = mongoose.model("User", userSchema);
