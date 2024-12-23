@@ -1,36 +1,24 @@
-const express = require("express");
-const router = express.Router();
-const User = require("../models/user");
+const {Router} = require('express');
+const User = require('../models/user')
+const router = Router();
 
-// Route to render the signin page
-router.get("/signin", (req, res) => {
-  return res.render("signin");
-});
-
-// Route to render the signup page
-router.get("/signup", (req, res) => {
-  return res.render("signup");
-});
-
-// Route to handle user signup
-router.post("/signup", async (req, res) => {
-  try {
-    const { fullName, email, password } = req.body;
-    // Create the user in the database
+router.get('/signin',(req,res)=>{
+    return res.render("signin")
+})
+router.get('/signup',(req,res)=>{
+    return res.render("signup");
+})
+router.post('/signup',async (req,res)=>{
+    const {fullName , password , email } = req.body;
     await User.create({
-      fullName,
-      email,
-      password,
+        fullName,
+        email,
+        password
     });
-    return res.redirect("/");
-  } catch (error) {
-    console.error("Error in signup:", error);
-    return res.status(500).send("An error occurred during signup.");
-  }
-});
+    return res.redirect('/');
+})
 
-// Route to handle user signin
-router.post("/signin", async (req, res) => {
+router.post('/signin',async(req,res)=>{
     const { password , email  } = req.body;
     try {
         const token =await User.matchPasswordAndGenerateToken(email,password);
@@ -41,6 +29,11 @@ router.post("/signin", async (req, res) => {
             error:"Incorrect Email or Password",
         });
     }
-});
+    
 
-module.exports = router;
+})
+
+router.get('/logout',(req, res)=>{
+    res.clearCookie('token').redirect('/');
+})
+module.exports=router;
